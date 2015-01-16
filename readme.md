@@ -1,5 +1,6 @@
 niteoaws
 ========
+![Travis CI](https://travis-ci.org/NiteoSoftware/niteoaws.svg)
 
 *This is a work in progress*
 
