@@ -1,17 +1,17 @@
 {
-  "name": "SkunkWerksResearch",
-  "version": "0.0.0",
+  "name": "niteoaws",
+  "version": "0.0.1",
   "description": "A Research Project",
-  "main": "index.js",
+  "main": "bin/lib/niteoaws.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt"
   },
   "repository": {
     "type": "git",
-    "url": "ssh://git@tsvs-stash.cloudapp.net:7999/skwe/research.git"
+    "url": "git@github.com:NiteoSoftware/niteoaws.git"
   },
-  "author": "VeriShip",
-  "license": "ISC",
+  "author": "Niteo Software",
+  "license": "MIT",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-contrib-coffee": "^0.12.0",
