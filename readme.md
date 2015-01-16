@@ -1,6 +1,7 @@
 niteoaws
 ========
-![Travis CI](https://travis-ci.org/NiteoSoftware/niteoaws.svg)
+[![Build Status](https://travis-ci.org/NiteoSoftware/niteoaws.svg?branch=master)](https://travis-ci.org/NiteoSoftware/niteoaws)
+[![Build status](https://ci.appveyor.com/api/projects/status/h1dmwhsf11ymnven?svg=true)](https://ci.appveyor.com/project/NiteoBuildBot/niteoaws)
 
 *This is a work in progress*
 
