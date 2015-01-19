@@ -17,7 +17,9 @@ niteoaws = require('niteoaws');
 
 var ec2InstancesProvider = niteoaws.ec2InstanceProvider.factory('us-east-1');
 
-console.log(JSON.stringify(ec2InstanceProvider.getResources(), null, 4));
+ec2InstanceProvider.getResources().done(function(data) {
+	console.log JSON.stringify(data, null, 4);	
+})
 ```
 
 Prints out all resources within the `us-east-1` region.
@@ -25,7 +27,9 @@ Prints out all resources within the `us-east-1` region.
 ```
 niteoaws = require('niteoaws');
 
-console.log(JSON.stringify(niteoaws.getResources(), null, 4));
+niteoaws.getResources().done(function(data) {
+	console.log JSON.stringify(data, null, 4);	
+})
 ```
 
 Currently Defined Providers:
