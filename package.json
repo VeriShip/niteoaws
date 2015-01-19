@@ -10,6 +10,12 @@
     "type": "git",
     "url": "https://github.com/NiteoSoftware/niteoaws.git"
   },
+  "directories": {
+    "lib": "./bin/lib"
+  },
+  "engines": {
+    "node": ">0.8.0"
+  },
   "author": "Niteo Software",
   "license": "MIT",
   "devDependencies": {
