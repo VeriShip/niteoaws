@@ -15,7 +15,7 @@ ec2ElasticIpsProvider = class extends resourceProvider
 		Q.nbind(ec2.describeAddresses, ec2)({ })
 			.then (data) =>
 				_.map data.Addresses, (address) ->
-					resource.generateResource address, address.address, @region, [ ], this
+					resource.generateResource address, address.Address, @region, [ ], this
 
 ec2ElasticIpsProvider.factory = (region) ->
 	new ec2ElasticIpsProvider region, aws, Q

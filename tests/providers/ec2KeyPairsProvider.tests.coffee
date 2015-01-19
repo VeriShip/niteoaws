@@ -8,7 +8,7 @@ AWS = null
 region = "Test Region"
 	
 getTarget = ->
-	new niteoaws.ec2VpcsProvider(region, AWS)
+	new niteoaws.ec2KeyPairsProvider(region, AWS)
 
 localSetup = ->
 	AWS = require 'aws-sdk'
@@ -17,40 +17,36 @@ describe 'niteoaws', ->
 
 	beforeEach localSetup
 
-	describe 'ec2VpcsProvider', ->
+	describe 'ec2KeyPairsProvider', ->
 
 		describe 'getResources', ->
 
-			generateTestVpcs = (num) ->
+			generateTestKeyPairs = (num) ->
 				i = 0
-				result = { Vpcs: [] }
+				result = { KeyPairs: [] }
 
 				while i < num 
-					result.Vpcs.push { VpcId: i, Tags: [
-							{ Key: "Key: #{i}", Value: "Value: #{i}"}
-						] }
+					result.KeyPairs.push { KeyName: i }
 					i++
 				result
 
 			getResourcesTests = (num, done) ->
 
-				resources = generateTestVpcs num
+				resources = generateTestKeyPairs num
 
 				AWS = 
 					EC2: class
-						describeVpcs: (options, callback) ->
+						describeKeyPairs: (options, callback) ->
 							callback null, resources
 
-				niteoVpcs = getTarget()
+				niteoKeyPairs = getTarget()
 
-				niteoVpcs.getResources()
+				niteoKeyPairs.getResources()
 					.done (data) ->
 							data.length.should.be.equal(num)
 							i = 0
 							while i < num
-								resources.Vpcs[i].VpcId.should.equal(data[i].id)
-								resources.Vpcs[i].Tags[0].Key.should.equal(data[i].tags[0].key)
-								resources.Vpcs[i].Tags[0].Value.should.equal(data[i].tags[0].value)
+								resources.KeyPairs[i].KeyName.should.equal(data[i].id)
 								i++
 							done()
 						, (err) ->

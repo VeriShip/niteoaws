@@ -8,7 +8,7 @@ AWS = null
 region = "Test Region"
 	
 getTarget = ->
-	new niteoaws.ec2VpcsProvider(region, AWS)
+	new niteoaws.ec2ElasticIpsProvider(region, AWS)
 
 localSetup = ->
 	AWS = require 'aws-sdk'
@@ -17,40 +17,36 @@ describe 'niteoaws', ->
 
 	beforeEach localSetup
 
-	describe 'ec2VpcsProvider', ->
+	describe 'ec2ElasticIpsProvider', ->
 
 		describe 'getResources', ->
 
-			generateTestVpcs = (num) ->
+			generateTestElasticIps = (num) ->
 				i = 0
-				result = { Vpcs: [] }
+				result = { Addresses: [] }
 
 				while i < num 
-					result.Vpcs.push { VpcId: i, Tags: [
-							{ Key: "Key: #{i}", Value: "Value: #{i}"}
-						] }
+					result.Addresses.push { Address: i }
 					i++
 				result
 
 			getResourcesTests = (num, done) ->
 
-				resources = generateTestVpcs num
+				resources = generateTestElasticIps num
 
 				AWS = 
 					EC2: class
-						describeVpcs: (options, callback) ->
+						describeAddresses: (options, callback) ->
 							callback null, resources
 
-				niteoVpcs = getTarget()
+				niteoElasticIps = getTarget()
 
-				niteoVpcs.getResources()
+				niteoElasticIps.getResources()
 					.done (data) ->
 							data.length.should.be.equal(num)
 							i = 0
 							while i < num
-								resources.Vpcs[i].VpcId.should.equal(data[i].id)
-								resources.Vpcs[i].Tags[0].Key.should.equal(data[i].tags[0].key)
-								resources.Vpcs[i].Tags[0].Value.should.equal(data[i].tags[0].value)
+								resources.Addresses[i].Address.should.equal(data[i].id)
 								i++
 							done()
 						, (err) ->

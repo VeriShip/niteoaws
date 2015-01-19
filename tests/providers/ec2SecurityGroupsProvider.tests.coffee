@@ -8,7 +8,7 @@ AWS = null
 region = "Test Region"
 	
 getTarget = ->
-	new niteoaws.ec2VpcsProvider(region, AWS)
+	new niteoaws.ec2SecurityGroupsProvider(region, AWS)
 
 localSetup = ->
 	AWS = require 'aws-sdk'
@@ -17,16 +17,16 @@ describe 'niteoaws', ->
 
 	beforeEach localSetup
 
-	describe 'ec2VpcsProvider', ->
+	describe 'ec2SecurityGroupsProvider', ->
 
 		describe 'getResources', ->
 
-			generateTestVpcs = (num) ->
+			generateTestSecurityGroups = (num) ->
 				i = 0
-				result = { Vpcs: [] }
+				result = { SecurityGroups: [] }
 
 				while i < num 
-					result.Vpcs.push { VpcId: i, Tags: [
+					result.SecurityGroups.push { GroupId: i, Tags: [
 							{ Key: "Key: #{i}", Value: "Value: #{i}"}
 						] }
 					i++
@@ -34,23 +34,23 @@ describe 'niteoaws', ->
 
 			getResourcesTests = (num, done) ->
 
-				resources = generateTestVpcs num
+				resources = generateTestSecurityGroups num
 
 				AWS = 
 					EC2: class
-						describeVpcs: (options, callback) ->
+						describeSecurityGroups: (options, callback) ->
 							callback null, resources
 
-				niteoVpcs = getTarget()
+				niteoSecurityGroups = getTarget()
 
-				niteoVpcs.getResources()
+				niteoSecurityGroups.getResources()
 					.done (data) ->
 							data.length.should.be.equal(num)
 							i = 0
 							while i < num
-								resources.Vpcs[i].VpcId.should.equal(data[i].id)
-								resources.Vpcs[i].Tags[0].Key.should.equal(data[i].tags[0].key)
-								resources.Vpcs[i].Tags[0].Value.should.equal(data[i].tags[0].value)
+								resources.SecurityGroups[i].GroupId.should.equal(data[i].id)
+								resources.SecurityGroups[i].Tags[0].Key.should.equal(data[i].tags[0].key)
+								resources.SecurityGroups[i].Tags[0].Value.should.equal(data[i].tags[0].value)
 								i++
 							done()
 						, (err) ->

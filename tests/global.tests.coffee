@@ -9,7 +9,7 @@ niteoaws = require(path.join __dirname, '../lib/niteoaws.js')
 describe.skip 'test', ->
 	this.timeout 10000
 
-	target = new niteoaws('us-west-2')
+	target = new niteoaws.ec2InstancesProvider('us-west-2', require 'aws-sdk')
 
 	it 'test', (done) ->
 
@@ -19,7 +19,7 @@ describe.skip 'test', ->
 						d.provider = null
 						d
 
-					fs.writeFileSync('./test.json', JSON.stringify(data, null, 4))
+					console.log JSON.stringify(data, null, 4)
 					done()
 				, (err) ->
 					console.log err

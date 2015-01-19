@@ -1,7 +1,7 @@
 {
   "name": "niteoaws",
   "version": "0.0.1",
-  "description": "A Research Project",
+  "description": "A library that can be used to help make youre AWS infrastructure more friendly.",
   "main": "bin/lib/niteoaws.js",
   "scripts": {
     "test": "grunt"

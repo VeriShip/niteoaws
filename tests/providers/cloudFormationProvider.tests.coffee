@@ -22,6 +22,8 @@ localSetup = ->
 
 describe 'niteoaws', ->
 
+	beforeEach localSetup
+
 	describe 'cloudFormationProvider', ->
 
 		describe 'getResources', ->
@@ -44,7 +46,6 @@ describe 'niteoaws', ->
 
 			it 'should return 50 resources when there are 5 pages with 10 items per page.', (done) ->
 
-				localSetup()
 				numTimesProgressCalled = 0
 
 				resources = generateTestStacks 5, 10
@@ -54,9 +55,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, resources.pop()
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.getResources()
+				niteoCF.getResources()
 					.done (data) ->
 							data.length.should.be.equal(50)
 							done()
@@ -67,7 +68,6 @@ describe 'niteoaws', ->
 
 			it 'should return 100 resources when there are 2 pages with 50 items per page.', (done) ->
 
-				localSetup()
 				numTimesProgressCalled = 0
 
 				resources = generateTestStacks 2, 50
@@ -77,9 +77,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, resources.pop()
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.getResources()
+				niteoCF.getResources()
 					.done (data) ->
 							data.length.should.be.equal(100)
 							done()
@@ -89,12 +89,9 @@ describe 'niteoaws', ->
 
 		describe 'validateTemplate', ->
 
-			localSetup()
-			verishipCF = getTarget() 
-
 			it 'should throw an exception if templateBody is null', (done) ->
 
-				verishipCF.validateTemplate null, "body"
+				getTarget().validateTemplate null, "body"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -103,7 +100,7 @@ describe 'niteoaws', ->
 
 			it 'should throw an exception if templateBody is undefined', (done) ->
 
-				verishipCF.validateTemplate niteoaws.undefinedMethod, "body"
+				getTarget().validateTemplate niteoaws.undefinedMethod, "body"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -112,7 +109,6 @@ describe 'niteoaws', ->
 
 			it 'should throw an exception if the template is not valid.', (done) ->
 
-				localSetup()
 				AWS = 
 					CloudFormation: class
 						constructor: (@region) ->
@@ -120,10 +116,10 @@ describe 'niteoaws', ->
 						validateTemplate: (body, callback) ->
 							callback "Random Error", null
 							
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
 				content = "{ }"
-				verishipCF.validateTemplate(content, "us-west-2")
+				niteoCF.validateTemplate(content, "us-west-2")
 					.done	(data) ->
 							assert.fail 'An error was expected.'
 							done()
@@ -132,7 +128,6 @@ describe 'niteoaws', ->
 
 			it 'should show success if the template is valid.', (done) ->
 
-				localSetup()
 				AWS = 
 					CloudFormation: class
 						constructor: (@region) ->
@@ -140,10 +135,10 @@ describe 'niteoaws', ->
 						validateTemplate: (body, callback) ->
 							callback null, "Success"
 							
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
 				content = "{ }"
-				verishipCF.validateTemplate(content, "us-west-2")
+				niteoCF.validateTemplate(content, "us-west-2")
 					.done	(data) ->
 							done()
 						, (err) ->
@@ -152,25 +147,21 @@ describe 'niteoaws', ->
 
 		describe 'doesStackExist', ->
 
-			localSetup()
-			verishipCF = getTarget() 
-
 			it 'should throw an exception if stackName is null', (done) ->
-				verishipCF.doesStackExist null, "region" 
+				getTarget().doesStackExist null, "region" 
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if stackName is undefined', (done) ->
-				verishipCF.doesStackExist verishipCF.somethingUndefined, "region" 
+				getTarget().doesStackExist undefined, "region" 
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should return true if the stack exists.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -182,9 +173,9 @@ describe 'niteoaws', ->
 									StackName: options.StackName
 								]
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.doesStackExist("TestStackName", "TestRegion")
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
 					.done (data) ->
 						data.should.be.true
 						done()
@@ -192,7 +183,6 @@ describe 'niteoaws', ->
 						assert.fail 'An error should not have been thrown here.'
 						done()
 			it 'should return true if the stack exists. (mutiple stacks returned.)', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -206,9 +196,9 @@ describe 'niteoaws', ->
 									{ StackName: "Some Other Random Stack" },
 								]
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.doesStackExist("TestStackName", "TestRegion")
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
 					.done (data) ->
 						data.should.be.true
 						done()
@@ -217,7 +207,6 @@ describe 'niteoaws', ->
 						done()
 
 			it 'should return false if the stack does not exist. (no stacks returned.)', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -227,9 +216,9 @@ describe 'niteoaws', ->
 							callback null, 
 								Stacks: [ ]
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.doesStackExist("TestStackName", "TestRegion")
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
 					.done (data) ->
 						data.should.be.false
 						done()
@@ -237,7 +226,6 @@ describe 'niteoaws', ->
 						assert.fail 'An error should not have been thrown here.'
 						done()
 			it 'should return false if the stack does not exist. (stacks returned but stack queried was not found.)', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -249,9 +237,9 @@ describe 'niteoaws', ->
 									{ StackName: "Some Random Stack" }
 								]
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.doesStackExist("TestStackName", "TestRegion")
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
 					.done (data) ->
 						data.should.be.false
 						done()
@@ -259,7 +247,6 @@ describe 'niteoaws', ->
 						assert.fail 'An error should not have been thrown here.'
 						done()
 			it 'should return false if the stack does not exist. (Stacks is undefined)', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -268,9 +255,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, { }
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.doesStackExist("TestStackName", "TestRegion")
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
 					.done (data) ->
 						data.should.be.false
 						done()
@@ -278,7 +265,6 @@ describe 'niteoaws', ->
 						assert.fail 'An error should not have been thrown here.'
 						done()
 			it 'should return an error if an error occured.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -287,9 +273,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback "Some Error", null
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.doesStackExist("TestStackName", "TestRegion")
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
 					.done (data) ->
 						assert.fail 'An error should have been raised.'
 						done()
@@ -298,18 +284,15 @@ describe 'niteoaws', ->
 
 		describe 'getStackId', ->
 
-			localSetup()
-			verishipCF = getTarget() 
-
 			it 'should throw an exception if stackName is null', (done) ->
-				verishipCF.getStackId null, "region" 
+				getTarget().getStackId null, "region" 
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if stackName is undefined', (done) ->
-				verishipCF.getStackId verishipCF.somethingUndefined, "region" 
+				getTarget().getStackId undefined, "region" 
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -318,7 +301,6 @@ describe 'niteoaws', ->
 
 			it 'should return stackId if the stack exists.', (done) ->
 				
-				localSetup()
 				expectedStackId = "Test Stack Id"
 
 				AWS = 
@@ -332,9 +314,9 @@ describe 'niteoaws', ->
 									StackId: expectedStackId
 								]
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.getStackId("TestStackName", "TestRegion")
+				niteoCF.getStackId("TestStackName", "TestRegion")
 					.done (data) ->
 						data.should.be.equal expectedStackId	
 						done()
@@ -344,7 +326,6 @@ describe 'niteoaws', ->
 
 			it 'should return error if the stack is not found.', (done) ->
 				
-				localSetup()
 				expectedStackId = "Test Stack Id"
 
 				AWS = 
@@ -355,9 +336,9 @@ describe 'niteoaws', ->
 							callback null, 
 								Stacks: [ ]
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.getStackId("TestStackName", "TestRegion")
+				niteoCF.getStackId("TestStackName", "TestRegion")
 					.done (data) ->
 						assert.fail 'An error should have been thrown here.'
 						done()
@@ -366,7 +347,6 @@ describe 'niteoaws', ->
 
 			it 'should return error if an error occured.', (done) ->
 				
-				localSetup()
 				expectedStackId = "Test Stack Id"
 
 				AWS = 
@@ -376,9 +356,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback "Some Error", null
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.getStackId("TestStackName", "TestRegion")
+				niteoCF.getStackId("TestStackName", "TestRegion")
 					.done (data) ->
 						assert.fail 'An error should have been thrown here.'
 						done()
@@ -387,12 +367,9 @@ describe 'niteoaws', ->
 
 		describe 'pollStackStatus', ->
 
-			localSetup()
-			verishipCF = getTarget()
-
 			it 'should throw an exception if stackId is null.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus(null, [ "" ], [ "" ], deferred)
+				getTarget().pollStackStatus(null, [ "" ], [ "" ], deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -401,7 +378,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if stackId is undefined.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus(undefined, [ "" ], [ "" ], deferred)
+				getTarget().pollStackStatus(undefined, [ "" ], [ "" ], deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -410,7 +387,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if successStatuses is null.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus("stackId", null, [ "" ], deferred)
+				getTarget().pollStackStatus("stackId", null, [ "" ], deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -419,7 +396,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if successStatuses is undefined.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus("stackId", undefined, [ "" ], deferred)
+				getTarget().pollStackStatus("stackId", undefined, [ "" ], deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -428,7 +405,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if successStatuses is empty.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus("stackId", [ ], [ "" ], deferred)
+				getTarget().pollStackStatus("stackId", [ ], [ "" ], deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -437,7 +414,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if failureStatuses is null.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus("stackId", [ "" ], null, deferred)
+				getTarget().pollStackStatus("stackId", [ "" ], null, deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -446,7 +423,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if failureStatuses is undefined.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus("stackId", [ "" ], undefined, deferred)
+				getTarget().pollStackStatus("stackId", [ "" ], undefined, deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -455,7 +432,7 @@ describe 'niteoaws', ->
 						done()
 			it 'should throw an exception if failureStatuses is empty.', (done) ->
 				deferred = Q.defer()
-				verishipCF.pollStackStatus("stackId", [ "" ], [ ], deferred)
+				getTarget().pollStackStatus("stackId", [ "" ], [ ], deferred)
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -464,7 +441,6 @@ describe 'niteoaws', ->
 						done()
 
 			it 'should return an error if one is encountered.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -473,10 +449,10 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback "Some Error", null	
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 				deferred = Q.defer()
 
-				verishipCF.pollStackStatus "stackId", [ "" ], [ "" ], deferred
+				niteoCF.pollStackStatus "stackId", [ "" ], [ "" ], deferred
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -485,7 +461,6 @@ describe 'niteoaws', ->
 						done()
 
 			it 'should return an error if no stacks are found.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -495,10 +470,10 @@ describe 'niteoaws', ->
 							callback null,
 								Stacks: [ ] 
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 				deferred = Q.defer()
 
-				verishipCF.pollStackStatus "stackId", [ "" ], [ "" ], deferred
+				niteoCF.pollStackStatus "stackId", [ "" ], [ "" ], deferred
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -507,7 +482,6 @@ describe 'niteoaws', ->
 						done()
 
 			it 'should return an error if a stack is found with a failure status.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -520,10 +494,10 @@ describe 'niteoaws', ->
 									StackStatus: "Some Failure Status"
 								] 
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 				deferred = Q.defer()
 
-				verishipCF.pollStackStatus "stackId", [ "" ], [ "Some Failure Status" ], deferred
+				niteoCF.pollStackStatus "stackId", [ "" ], [ "Some Failure Status" ], deferred
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -532,7 +506,6 @@ describe 'niteoaws', ->
 						done()
 
 			it 'should return success if a stack is found with a success status.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -545,10 +518,10 @@ describe 'niteoaws', ->
 									StackStatus: "Some Success Status"
 								] 
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 				deferred = Q.defer()
 
-				verishipCF.pollStackStatus "stackId", [ "Some Success Status" ], [ "Some Failure" ], deferred
+				niteoCF.pollStackStatus "stackId", [ "Some Success Status" ], [ "Some Failure" ], deferred
 				deferred.promise
 					.done (data) ->
 						done()
@@ -575,8 +548,6 @@ describe 'niteoaws', ->
 					}
 				]
 
-				localSetup()
-
 				AWS = 
 					CloudFormation: class
 						constructor: (@region) ->
@@ -584,10 +555,10 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, stackQueue.pop()	
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 				deferred = Q.defer()
 
-				verishipCF.pollStackStatus targetStackId, [ "" ], failureStatuses, deferred
+				niteoCF.pollStackStatus targetStackId, [ "" ], failureStatuses, deferred
 				deferred.promise
 					.done (data) ->
 						assert.fail 'There should have been an exception thrown.'
@@ -614,8 +585,6 @@ describe 'niteoaws', ->
 					}
 				]
 
-				localSetup()
-
 				AWS = 
 					CloudFormation: class
 						constructor: (@region) ->
@@ -623,10 +592,10 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, stackQueue.pop()	
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 				deferred = Q.defer()
 
-				verishipCF.pollStackStatus targetStackId, successStatuses, [ "" ], deferred
+				niteoCF.pollStackStatus targetStackId, successStatuses, [ "" ], deferred
 				deferred.promise
 					.done (data) ->
 						done()
@@ -636,32 +605,29 @@ describe 'niteoaws', ->
 
 		describe 'createStack', ->
 
-			localSetup()
-			verishipCF = getTarget() 
-
 			it 'should throw an exception if stackName is null.', (done) ->
-				verishipCF.createStack null, "templateBody"
+				getTarget().createStack null, "templateBody"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if stackName is undefined.', (done) ->
-				verishipCF.createStack undefined, "templateBody"
+				getTarget().createStack undefined, "templateBody"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if templateBody is null.', (done) ->
-				verishipCF.createStack "stackName", null
+				getTarget().createStack "stackName", null
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if templateBody is undefined.', (done) ->
-				verishipCF.createStack "stackName", undefined
+				getTarget().createStack "stackName", undefined
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -669,7 +635,6 @@ describe 'niteoaws', ->
 							done()
 
 			it 'should raise an exception if an exception happens.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -678,9 +643,9 @@ describe 'niteoaws', ->
 						createStack: (options, callback) ->
 							callback "someException", null
 
-				verishipCF = getTarget() 
+				niteoCF = getTarget() 
 
-				verishipCF.createStack "stackName", "body", { Parameters: [ ] }
+				niteoCF.createStack "stackName", "body", { Parameters: [ ] }
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -709,7 +674,6 @@ describe 'niteoaws', ->
 							StackStatus: "Some Pending Status"
 						]
 
-				localSetup()
 				numTimesProgressCalled = 0
 
 				AWS = 
@@ -721,9 +685,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, stackQueue.pop()	
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.createStack stackName, "body"
+				niteoCF.createStack stackName, "body"
 					.done (data) ->
 						if isSuccess
 							numTimesProgressCalled.should.be.equal(numPolls)
@@ -773,18 +737,15 @@ describe 'niteoaws', ->
 
 		describe 'deleteStack', ->
 
-			localSetup()
-			verishipCF = getTarget() 
-
 			it 'should throw an exception if stackName is null.', (done) ->
-				verishipCF.deleteStack null
+				getTarget().deleteStack null
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if stackName is undefined.', (done) ->
-				verishipCF.deleteStack undefined
+				getTarget().deleteStack undefined
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -792,7 +753,6 @@ describe 'niteoaws', ->
 							done()
 
 			it 'should raise an exception if an exception happens.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -801,9 +761,9 @@ describe 'niteoaws', ->
 						deleteStack: (options, callback) ->
 							callback "someException", null
 
-				verishipCF = getTarget() 
+				niteoCF = getTarget() 
 
-				verishipCF.deleteStack "stackName"
+				niteoCF.deleteStack "stackName"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -834,7 +794,6 @@ describe 'niteoaws', ->
 							StackStatus: "Some Pending Status"
 						]
 
-				localSetup()
 				numTimesProgressCalled = 0
 
 				AWS = 
@@ -846,9 +805,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, stackQueue.pop()	
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.deleteStack stackName
+				niteoCF.deleteStack stackName
 					.done (data) ->
 						if isSuccess
 							numTimesProgressCalled.should.be.equal(numPolls)
@@ -891,32 +850,29 @@ describe 'niteoaws', ->
 
 		describe 'updateStack', ->
 
-			localSetup()
-			verishipCF = getTarget() 
-
 			it 'should throw an exception if stackName is null.', (done) ->
-				verishipCF.updateStack null, "templateBody"
+				getTarget().updateStack null, "templateBody"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if stackName is undefined.', (done) ->
-				verishipCF.updateStack undefined, "templateBody"
+				getTarget().updateStack undefined, "templateBody"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if templateBody is null.', (done) ->
-				verishipCF.updateStack "stackName", null
+				getTarget().updateStack "stackName", null
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
 						, (err) ->
 							done()
 			it 'should throw an exception if templateBody is undefined.', (done) ->
-				verishipCF.updateStack "stackName", undefined
+				getTarget().updateStack "stackName", undefined
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -924,7 +880,6 @@ describe 'niteoaws', ->
 							done()
 
 			it 'should raise an exception if an exception happens.', (done) ->
-				localSetup()
 
 				AWS = 
 					CloudFormation: class
@@ -933,9 +888,9 @@ describe 'niteoaws', ->
 						updateStack: (options, callback) ->
 							callback "someException", null
 
-				verishipCF = getTarget() 
+				niteoCF = getTarget() 
 
-				verishipCF.updateStack "stackName", "body"
+				niteoCF.updateStack "stackName", "body"
 					.done (data) ->
 							assert.fail 'There should have been an exception thrown.'
 							done()
@@ -966,7 +921,6 @@ describe 'niteoaws', ->
 							StackStatus: "Some Pending Status"
 						]
 
-				localSetup()
 				numTimesProgressCalled = 0
 
 				AWS = 
@@ -978,9 +932,9 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, stackQueue.pop()	
 
-				verishipCF = getTarget()
+				niteoCF = getTarget()
 
-				verishipCF.updateStack stackName, "body"
+				niteoCF.updateStack stackName, "body"
 					.done (data) ->
 						if isSuccess
 							numTimesProgressCalled.should.be.equal(numPolls)

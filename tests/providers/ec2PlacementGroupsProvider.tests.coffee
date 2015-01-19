@@ -8,7 +8,7 @@ AWS = null
 region = "Test Region"
 	
 getTarget = ->
-	new niteoaws.ec2VpcsProvider(region, AWS)
+	new niteoaws.ec2PlacementGroupsProvider(region, AWS)
 
 localSetup = ->
 	AWS = require 'aws-sdk'
@@ -17,40 +17,36 @@ describe 'niteoaws', ->
 
 	beforeEach localSetup
 
-	describe 'ec2VpcsProvider', ->
+	describe 'ec2PlacementGroupsProvider', ->
 
 		describe 'getResources', ->
 
-			generateTestVpcs = (num) ->
+			generateTestPlacementGroups = (num) ->
 				i = 0
-				result = { Vpcs: [] }
+				result = { PlacementGroups: [] }
 
 				while i < num 
-					result.Vpcs.push { VpcId: i, Tags: [
-							{ Key: "Key: #{i}", Value: "Value: #{i}"}
-						] }
+					result.PlacementGroups.push { GroupName: i }
 					i++
 				result
 
 			getResourcesTests = (num, done) ->
 
-				resources = generateTestVpcs num
+				resources = generateTestPlacementGroups num
 
 				AWS = 
 					EC2: class
-						describeVpcs: (options, callback) ->
+						describePlacementGroups: (options, callback) ->
 							callback null, resources
 
-				niteoVpcs = getTarget()
+				niteoPlacementGroups = getTarget()
 
-				niteoVpcs.getResources()
+				niteoPlacementGroups.getResources()
 					.done (data) ->
 							data.length.should.be.equal(num)
 							i = 0
 							while i < num
-								resources.Vpcs[i].VpcId.should.equal(data[i].id)
-								resources.Vpcs[i].Tags[0].Key.should.equal(data[i].tags[0].key)
-								resources.Vpcs[i].Tags[0].Value.should.equal(data[i].tags[0].value)
+								resources.PlacementGroups[i].GroupName.should.equal(data[i].id)
 								i++
 							done()
 						, (err) ->

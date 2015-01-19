@@ -15,6 +15,8 @@ localSetup = ->
 
 describe 'niteoaws', ->
 
+	beforeEach localSetup
+
 	describe 'ec2ImagesProvider', ->
 
 		describe 'getResources', ->
@@ -31,7 +33,6 @@ describe 'niteoaws', ->
 				result
 
 			getResourcesTests = (num, done) ->
-				localSetup()
 
 				resources = generateTestImages num
 
@@ -40,9 +41,9 @@ describe 'niteoaws', ->
 						describeImages: (options, callback) ->
 							callback null, resources
 
-				verishipImages = getTarget()
+				niteoImages = getTarget()
 
-				verishipImages.getResources()
+				niteoImages.getResources()
 					.done (data) ->
 							data.length.should.be.equal(num)
 							i = 0

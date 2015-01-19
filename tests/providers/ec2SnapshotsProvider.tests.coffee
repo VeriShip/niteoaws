@@ -8,7 +8,7 @@ AWS = null
 region = "Test Region"
 	
 getTarget = ->
-	new niteoaws.ec2VpcsProvider(region, AWS)
+	new niteoaws.ec2SnapshotsProvider(region, AWS)
 
 localSetup = ->
 	AWS = require 'aws-sdk'
@@ -17,16 +17,16 @@ describe 'niteoaws', ->
 
 	beforeEach localSetup
 
-	describe 'ec2VpcsProvider', ->
+	describe 'ec2SnapshotsProvider', ->
 
 		describe 'getResources', ->
 
-			generateTestVpcs = (num) ->
+			generateTestSnapshots = (num) ->
 				i = 0
-				result = { Vpcs: [] }
+				result = { Snapshots: [] }
 
 				while i < num 
-					result.Vpcs.push { VpcId: i, Tags: [
+					result.Snapshots.push { SnapshotId: i, Tags: [
 							{ Key: "Key: #{i}", Value: "Value: #{i}"}
 						] }
 					i++
@@ -34,23 +34,23 @@ describe 'niteoaws', ->
 
 			getResourcesTests = (num, done) ->
 
-				resources = generateTestVpcs num
+				resources = generateTestSnapshots num
 
 				AWS = 
 					EC2: class
-						describeVpcs: (options, callback) ->
+						describeSnapshots: (options, callback) ->
 							callback null, resources
 
-				niteoVpcs = getTarget()
+				niteoSnapshots = getTarget()
 
-				niteoVpcs.getResources()
+				niteoSnapshots.getResources()
 					.done (data) ->
 							data.length.should.be.equal(num)
 							i = 0
 							while i < num
-								resources.Vpcs[i].VpcId.should.equal(data[i].id)
-								resources.Vpcs[i].Tags[0].Key.should.equal(data[i].tags[0].key)
-								resources.Vpcs[i].Tags[0].Value.should.equal(data[i].tags[0].value)
+								resources.Snapshots[i].SnapshotId.should.equal(data[i].id)
+								resources.Snapshots[i].Tags[0].Key.should.equal(data[i].tags[0].key)
+								resources.Snapshots[i].Tags[0].Value.should.equal(data[i].tags[0].value)
 								i++
 							done()
 						, (err) ->
