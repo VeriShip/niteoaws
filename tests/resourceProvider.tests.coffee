@@ -180,9 +180,6 @@ describe 'niteoaws', ->
 
 		describe 'getResource', ->
 
-			#	Set the timeout to a low value.
-			this.timeout 10
-
 			resources = 
 				[
 					{ id: "Some Id" },
