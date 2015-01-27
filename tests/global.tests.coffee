@@ -9,16 +9,12 @@ niteoaws = require(path.join __dirname, '../lib/niteoaws.js')
 describe.skip 'test', ->
 	this.timeout 10000
 
-	target = new niteoaws.ec2InstancesProvider('us-west-2', require 'aws-sdk')
+	target = new niteoaws.ec2KeyPairsProvider('us-east-1', require 'aws-sdk')
 
 	it 'test', (done) ->
 
-		target.getResources()
+		target.deleteKeyPair("TestKeyName")
 			.done (data) ->
-					data = _.map data, (d) ->
-						d.provider = null
-						d
-
 					console.log JSON.stringify(data, null, 4)
 					done()
 				, (err) ->

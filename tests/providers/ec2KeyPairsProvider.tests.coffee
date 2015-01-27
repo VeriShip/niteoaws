@@ -64,3 +64,63 @@ describe 'niteoaws', ->
 			it 'should return 100 resources when there are 100 items.', (done) ->
 
 				getResourcesTests 100, done
+
+		describe 'createKeyPair', (done) ->
+			
+			beforeEach ->	
+				AWS = 
+					EC2: class
+						createKeyPair: (options, callback) ->
+							callback "error", null
+
+			it 'should throw an error if keyName is undefined.', (done) ->
+
+				getTarget().createKeyPair(undefined).catch () ->
+					done()
+
+			it 'should throw an error if keyName is null.', (done) ->
+
+				getTarget().createKeyPair(null).catch () ->
+					done()
+
+			it 'should pass the correct keyname in the options of the call.', (done) ->
+				
+				AWS = 
+					EC2: class
+						createKeyPair: (options, callback) ->
+							callback null, options
+
+				getTarget().createKeyPair("Some Key Name")
+					.done (options) ->
+							options.should.eql { KeyName: "Some Key Name" }
+							done()
+
+		describe 'deleteKeyPair', (done) ->
+				
+			beforeEach ->	
+				AWS = 
+					EC2: class
+						deleteKeyPair: (options, callback) ->
+							callback "error", null
+
+			it 'should throw an error if keyName is undefined.', (done) ->
+
+				getTarget().deleteKeyPair(undefined).catch () ->
+					done()
+
+			it 'should throw an error if keyName is null.', (done) ->
+
+				getTarget().deleteKeyPair(null).catch () ->
+					done()
+
+			it 'should pass the correct keyname in the options of the call.', (done) ->
+				
+				AWS = 
+					EC2: class
+						deleteKeyPair: (options, callback) ->
+							callback null, options
+
+				getTarget().deleteKeyPair("Some Key Name")
+					.done (options) ->
+							options.should.eql { KeyName: "Some Key Name" }
+							done()
