@@ -66,7 +66,8 @@ describe 'niteoaws', ->
 				getResourcesTests 100, done
 
 		describe 'createKeyPair', (done) ->
-				
+			
+			beforeEach ->	
 				AWS = 
 					EC2: class
 						createKeyPair: (options, callback) ->
@@ -96,6 +97,7 @@ describe 'niteoaws', ->
 
 		describe 'deleteKeyPair', (done) ->
 				
+			beforeEach ->	
 				AWS = 
 					EC2: class
 						deleteKeyPair: (options, callback) ->
