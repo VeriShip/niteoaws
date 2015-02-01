@@ -87,6 +87,18 @@ describe 'niteoaws', ->
 							assert.fail 'An error should not have been thrown.'
 							done()
 
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				getTarget().getResources()
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
+
 		describe 'validateTemplate', ->
 
 			it 'should throw an exception if templateBody is null', (done) ->
@@ -144,6 +156,18 @@ describe 'niteoaws', ->
 						, (err) ->
 							assert.fail 'The template should be valid.'
 							done()
+
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				getTarget().validateTemplate( { }, "us-west-2")
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
 
 		describe 'doesStackExist', ->
 
@@ -282,6 +306,19 @@ describe 'niteoaws', ->
 					, (err) ->
 						done()
 
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoCF = getTarget()
+				niteoCF.doesStackExist("TestStackName", "TestRegion")
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
+
 		describe 'getStackId', ->
 
 			it 'should throw an exception if stackName is null', (done) ->
@@ -363,6 +400,19 @@ describe 'niteoaws', ->
 						assert.fail 'An error should have been thrown here.'
 						done()
 					, (err) ->
+						done()
+
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoCF = getTarget()
+				niteoCF.getStackId("TestStackName", "TestRegion")
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
 						done()
 
 		describe 'pollStackStatus', ->
@@ -603,6 +653,25 @@ describe 'niteoaws', ->
 						assert.fail 'There should not have been an exception thrown.'
 						done()
 
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				targetStackId = "Some Stack Id"
+				successStackStatus = "Success Status"
+				successStatuses = [ "Some Other Success", successStackStatus ]
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				deferred = Q.defer()
+				niteoCF = getTarget()
+				niteoCF.pollStackStatus targetStackId, successStatuses, [ "" ], deferred
+				deferred.promise
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
+
 		describe 'createStack', ->
 
 			it 'should throw an exception if stackName is null.', (done) ->
@@ -735,6 +804,19 @@ describe 'niteoaws', ->
 
 				createStackTestPolling "Test Stack", "CREATE_COMPLETE", 50, true, done
 
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoCF = getTarget()
+				niteoCF.createStack "stackName", "body", { Parameters: [ ] }
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
+
 		describe 'deleteStack', ->
 
 			it 'should throw an exception if stackName is null.', (done) ->
@@ -847,6 +929,19 @@ describe 'niteoaws', ->
 			it 'should return success if a stack is found with a success status. (DELETE_SKIPPED, 50 Polls)', (done) ->
 
 				deleteStackTestPolling "Test Stack", "DELETE_SKIPPED", 50, true, done
+
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoCF = getTarget()
+				niteoCF.deleteStack "stackName"
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
 
 		describe 'updateStack', ->
 
@@ -974,3 +1069,16 @@ describe 'niteoaws', ->
 			it 'should return success if a stack is found with a success status. (UPDATE_COMPLETE, 50 Polls)', (done) ->
 
 				updateStackTestPolling "Test Stack", "UPDATE_COMPLETE", 50, true, done
+
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					CloudFormation: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoCF = getTarget()
+				niteoCF.updateStack "stackName", "body"
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()

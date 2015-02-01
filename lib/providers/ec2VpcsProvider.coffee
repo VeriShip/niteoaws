@@ -11,11 +11,14 @@ ec2VpcsProvider = class extends resourceProvider
 		super region
 
 	getResources: () ->
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.describeVpcs, ec2)({ })
-			.then (data) =>
-				_.map data.Vpcs, (vpc) ->
-					resource.generateResource vpc, vpc.VpcId, @region, tag.createTags(vpc.Tags), this
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.describeVpcs, ec2)({ })
+				.then (data) =>
+					_.map data.Vpcs, (vpc) ->
+						resource.generateResource vpc, vpc.VpcId, @region, tag.createTags(vpc.Tags), this
+		catch e
+			Q.reject e
 
 ec2VpcsProvider.factory = (region) ->
 	new ec2VpcsProvider region, aws

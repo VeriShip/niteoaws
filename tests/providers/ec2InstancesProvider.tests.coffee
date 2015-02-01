@@ -79,3 +79,17 @@ describe 'niteoaws', ->
 						, (err) ->
 							assert.fail 'An error should not have been thrown.'
 							done()
+			
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					EC2: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				instanceProvider = getTarget()
+
+				instanceProvider.getResources()
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()

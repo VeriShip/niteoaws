@@ -11,27 +11,35 @@ ec2KeyPairsProvider = class extends resourceProvider
 		super region
 
 	getResources: () ->
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.describeKeyPairs, ec2)({ })
-			.then (data) =>
-				_.map data.KeyPairs, (keyPair) ->
-					resource.generateResource keyPair, keyPair.KeyName, @region, [ ], this
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.describeKeyPairs, ec2)({ })
+				.then (data) =>
+					_.map data.KeyPairs, (keyPair) ->
+						resource.generateResource keyPair, keyPair.KeyName, @region, [ ], this
+		catch e
+			Q.reject e
 
 	createKeyPair: (keyName) ->
-
 		if !keyName?
 			Q.reject 'You must define a keyName.'
 
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.createKeyPair, ec2)({ KeyName: keyName })
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.createKeyPair, ec2)({ KeyName: keyName })
+		catch e
+			Q.reject e
 
 	deleteKeyPair: (keyName) ->
 
 		if !keyName?
 			Q.reject 'You must define a keyName.'
 
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.deleteKeyPair, ec2)({ KeyName: keyName })
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.deleteKeyPair, ec2)({ KeyName: keyName })
+		catch e
+			Q.reject e
 
 ec2KeyPairsProvider.factory = (region) ->
 	new ec2KeyPairsProvider region, aws, Q

@@ -64,3 +64,17 @@ describe 'niteoaws', ->
 			it 'should return 100 resources when there are 100 items.', (done) ->
 
 				getResourcesTests 100, done
+			
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					EC2: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoElasticIps = getTarget()
+
+				niteoElasticIps.getResources()
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()

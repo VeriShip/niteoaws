@@ -11,11 +11,15 @@ ec2PlacementGroupsProvider = class extends resourceProvider
 		super region
 
 	getResources: () ->
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.describePlacementGroups, ec2)({ })
-			.then (data) =>
-				_.map data.PlacementGroups, (group) ->
-					resource.generateResource group, group.GroupName, @region, [ ], this
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.describePlacementGroups, ec2)({ })
+				.then (data) =>
+					_.map data.PlacementGroups, (group) ->
+						resource.generateResource group, group.GroupName, @region, [ ], this
+		catch e
+			Q.reject e
+		
 
 ec2PlacementGroupsProvider.factory = (region) ->
 	new ec2PlacementGroupsProvider region, aws, Q

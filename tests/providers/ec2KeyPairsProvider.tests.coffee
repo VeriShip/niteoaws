@@ -64,6 +64,20 @@ describe 'niteoaws', ->
 			it 'should return 100 resources when there are 100 items.', (done) ->
 
 				getResourcesTests 100, done
+			
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					EC2: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				niteoKeyPairs = getTarget()
+
+				niteoKeyPairs.getResources()
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
 
 		describe 'createKeyPair', (done) ->
 			
@@ -94,6 +108,18 @@ describe 'niteoaws', ->
 					.done (options) ->
 							options.should.eql { KeyName: "Some Key Name" }
 							done()
+			
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					EC2: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				getTarget().createKeyPair("Some Key Name")
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
 
 		describe 'deleteKeyPair', (done) ->
 				
@@ -124,3 +150,15 @@ describe 'niteoaws', ->
 					.done (options) ->
 							options.should.eql { KeyName: "Some Key Name" }
 							done()
+			
+			it 'should still return a promise if an exception is encountered.', (done) ->
+
+				AWS = 
+					EC2: class
+						constructor: ->
+							throw 'Some Random Error'
+
+				getTarget().deleteKeyPair("Some Key Name")
+					.catch (err) ->
+						err.should.equal 'Some Random Error'
+						done()
