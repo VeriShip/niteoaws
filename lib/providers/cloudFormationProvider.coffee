@@ -66,7 +66,7 @@ cloudFormationProvider = class extends resourceProvider
 
 		try
 			cf = new @AWS.CloudFormation({ region: @region })
-		cf.describeStacks { }, (err, data) ->
+			cf.describeStacks { }, (err, data) ->
 
 				if err?
 					deferred.reject err
@@ -223,17 +223,19 @@ cloudFormationProvider = class extends resourceProvider
 			if parameters?
 				updateStackOptions.Parameters = parameters
 
-		deferred = @Q.defer()
-		cf = new @AWS.CloudFormation({ region: @region })
-		cf.updateStack updateStackOptions, (err, data) =>
-			if err?
-				deferred.reject err
-			else
-				@getStackId(stackName)
-					.done (id) =>
-							@pollStackStatus id, ["UPDATE_COMPLETE"], ["UPDATE_ROLLBACK_FAILED", "UPDATE_ROLLBACK_COMPLETE"], deferred
-						, (err) =>
-							deferred.reject err
+			cf = new @AWS.CloudFormation({ region: @region })
+			cf.updateStack updateStackOptions, (err, data) =>
+				if err?
+					deferred.reject err
+				else
+					@getStackId(stackName)
+						.done (id) =>
+								@pollStackStatus id, ["UPDATE_COMPLETE"], ["UPDATE_ROLLBACK_FAILED", "UPDATE_ROLLBACK_COMPLETE"], deferred
+							, (err) =>
+								deferred.reject err
+		catch e
+			deferred.reject e
+		
 		deferred.promise
 
 cloudFormationProvider.factory = (region) ->
