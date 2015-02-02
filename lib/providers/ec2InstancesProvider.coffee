@@ -18,24 +18,27 @@ ec2InstancesProvider = class extends resourceProvider
 		if !deferred?
 			deferred = Q.defer()
 
-		describeInstancesOptions = { }
-		if nextToken?
-			describeInstancesOptions.NextToken = nextToken
+		try
+			describeInstancesOptions = { }
+			if nextToken?
+				describeInstancesOptions.NextToken = nextToken
 
-		ec2 = new @AWS.EC2({region: @region})
-		ec2.describeInstances describeInstancesOptions, (err, data) =>
-			if err?
-				deferred.reject err
-			else 
-				for reservation in data.Reservations
-					for instance in reservation.Instances
-						resources.push(resource.generateResource instance, instance.InstanceId, @region, tag.createTags(instance.Tags), this)
+			ec2 = new @AWS.EC2({region: @region})
+			ec2.describeInstances describeInstancesOptions, (err, data) =>
+				if err?
+					deferred.reject err
+				else 
+					for reservation in data.Reservations
+						for instance in reservation.Instances
+							resources.push(resource.generateResource instance, instance.InstanceId, @region, tag.createTags(instance.Tags), this)
 
-				if data.NextToken?
-					deferred.notify data.NextToken
-					@getResources data.NextToken, resources, deferred
-				else
-					deferred.resolve resources
+					if data.NextToken?
+						deferred.notify data.NextToken
+						@getResources data.NextToken, resources, deferred
+					else
+						deferred.resolve resources
+		catch e
+			deferred.reject e
 
 		return deferred.promise
 

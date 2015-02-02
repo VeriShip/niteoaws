@@ -23,23 +23,26 @@ cloudFormationProvider = class extends resourceProvider
 		if !deferred?
 			deferred = @Q.defer()
 
-		describeStacksOptions = { }
-		if nextToken?
-			describeStacksOptions.NextToken = nextToken
+		try
+			describeStacksOptions = { }
+			if nextToken?
+				describeStacksOptions.NextToken = nextToken
 
-		cf = new @AWS.CloudFormation({region: @region})
-		cf.describeStacks describeStacksOptions, (err, data) =>
-			if err?
-				deferred.reject err
-			else 
-				for stack in data.Stacks
-					resources.push(resource.generateResource stack, stack.StackId, @region, tag.createTags(stack.Tags), this)
+			cf = new @AWS.CloudFormation({region: @region})
+			cf.describeStacks describeStacksOptions, (err, data) =>
+				if err?
+					deferred.reject err
+				else 
+					for stack in data.Stacks
+						resources.push(resource.generateResource stack, stack.StackId, @region, tag.createTags(stack.Tags), this)
 
-				if data.NextToken?
-					deferred.notify data.NextToken
-					@getResources data.NextToken, resources, deferred
-				else
-					deferred.resolve resources
+					if data.NextToken?
+						deferred.notify data.NextToken
+						@getResources data.NextToken, resources, deferred
+					else
+						deferred.resolve resources
+		catch e
+			deferred.reject e
 
 		return deferred.promise
 
@@ -48,8 +51,11 @@ cloudFormationProvider = class extends resourceProvider
 		if !templateBody?
 			return @Q.reject 'You must define the templateBody.'
 
-		cf = new @AWS.CloudFormation({region: @region})
-		@Q.nbind(cf.validateTemplate, cf)({ TemplateBody: templateBody })
+		try
+			cf = new @AWS.CloudFormation({region: @region})
+			@Q.nbind(cf.validateTemplate, cf)({ TemplateBody: templateBody })
+		catch e
+			@Q.reject e
 
 	doesStackExist: (stackName) ->
 
@@ -57,16 +63,20 @@ cloudFormationProvider = class extends resourceProvider
 			return @Q.reject 'You must define stackName.'
 
 		deferred = @Q.defer()
-		cf = new @AWS.CloudFormation({ region: @region })
+
+		try
+			cf = new @AWS.CloudFormation({ region: @region })
 		cf.describeStacks { }, (err, data) ->
 
-			if err?
-				deferred.reject err
-			else
-				foundStacks = _.find data.Stacks, 
-					StackName: stackName
+				if err?
+					deferred.reject err
+				else
+					foundStacks = _.find data.Stacks, 
+						StackName: stackName
 
-				deferred.resolve foundStacks?
+					deferred.resolve foundStacks?
+		catch e
+			deferred.reject e
 
 		deferred.promise
 
@@ -76,19 +86,23 @@ cloudFormationProvider = class extends resourceProvider
 			return @Q.reject 'You must define stackName.'
 
 		deferred = @Q.defer()
-		cf = new @AWS.CloudFormation({ region: @region })
-		cf.describeStacks { StackName: stackName }, (err, data) ->
 
-			if err?
-				deferred.reject err
-			else
-				foundStacks = _.find data.Stacks, 
-					StackName: stackName
+		try
+			cf = new @AWS.CloudFormation({ region: @region })
+			cf.describeStacks { StackName: stackName }, (err, data) ->
 
-				if foundStacks?
-					deferred.resolve foundStacks.StackId
+				if err?
+					deferred.reject err
 				else
-					deferred.reject "Unable to find the stack #{stackName} amongst the active stacks."
+					foundStacks = _.find data.Stacks, 
+						StackName: stackName
+
+					if foundStacks?
+						deferred.resolve foundStacks.StackId
+					else
+						deferred.reject "Unable to find the stack #{stackName} amongst the active stacks."
+		catch e
+			deferred.reject e
 
 		deferred.promise
 
@@ -114,24 +128,27 @@ cloudFormationProvider = class extends resourceProvider
 			deferred.reject 'You must supply an array of failureStatuses.'
 			return
 
-		cf = new @AWS.CloudFormation({ region: @region })
-		cf.describeStacks { StackName: stackId }, (err, data) =>
-			if err?
-				deferred.reject err	
-			else
-				targetStack = _.find data.Stacks, { StackId: stackId }
-				
-				if !targetStack?
-					deferred.reject "Unable to find the stack #{stackId}"
-				else if _.contains failureStatuses, targetStack.StackStatus
-					deferred.reject "The stack reached a failed status: #{targetStack.StackStatus}"
-				else if _.contains successStatuses, targetStack.StackStatus
-					deferred.resolve targetStack.StackStatus
+		try
+			cf = new @AWS.CloudFormation({ region: @region })
+			cf.describeStacks { StackName: stackId }, (err, data) =>
+				if err?
+					deferred.reject err	
 				else
-					deferred.notify targetStack.StackStatus
-					@t.setTimeout( =>
-							@pollStackStatus stackId, successStatuses, failureStatuses, deferred 
-						5000)
+					targetStack = _.find data.Stacks, { StackId: stackId }
+					
+					if !targetStack?
+						deferred.reject "Unable to find the stack #{stackId}"
+					else if _.contains failureStatuses, targetStack.StackStatus
+						deferred.reject "The stack reached a failed status: #{targetStack.StackStatus}"
+					else if _.contains successStatuses, targetStack.StackStatus
+						deferred.resolve targetStack.StackStatus
+					else
+						deferred.notify targetStack.StackStatus
+						@t.setTimeout( =>
+								@pollStackStatus stackId, successStatuses, failureStatuses, deferred 
+							5000)
+		catch e
+			deferred.reject e
 
 	createStack: (stackName, templateBody, parameters) ->
 
@@ -141,24 +158,29 @@ cloudFormationProvider = class extends resourceProvider
 		if !templateBody?
 			return @Q.reject 'You must define templateBody'
 
-		createStackOptions = 
-			StackName: stackName,
-			TemplateBody: templateBody
-
-		if parameters?
-			createStackOptions.Parameters = parameters
-
 		deferred = @Q.defer()
-		cf = new @AWS.CloudFormation({ region: @region })
-		cf.createStack createStackOptions, (err, data) =>
-			if err?
-				deferred.reject err
-			else
-				@getStackId(stackName)
-					.done (id) =>
-							@pollStackStatus id, ["CREATE_COMPLETE"], ["CREATE_FAILED", "ROLLBACK_COMPLETE", "ROLLBACK_FAILED"], deferred
-						, (err) =>
-							deferred.reject err
+
+		try
+			createStackOptions = 
+				StackName: stackName,
+				TemplateBody: templateBody
+
+			if parameters?
+				createStackOptions.Parameters = parameters
+
+			cf = new @AWS.CloudFormation({ region: @region })
+			cf.createStack createStackOptions, (err, data) =>
+				if err?
+					deferred.reject err
+				else
+					@getStackId(stackName)
+						.done (id) =>
+								@pollStackStatus id, ["CREATE_COMPLETE"], ["CREATE_FAILED", "ROLLBACK_COMPLETE", "ROLLBACK_FAILED"], deferred
+							, (err) =>
+								deferred.reject err
+		catch e
+			deferred.reject e
+
 		deferred.promise
 
 	deleteStack: (stackName) ->
@@ -166,16 +188,20 @@ cloudFormationProvider = class extends resourceProvider
 			return @Q.reject 'You must define stackName'
 
 		deferred = @Q.defer()
-		cf = new @AWS.CloudFormation({ region: @region })
-		cf.deleteStack { StackName: stackName }, (err, data) =>
-			if err?
-				deferred.reject err
-			else
-				@getStackId(stackName)
-					.done (id) =>
-							@pollStackStatus id, ["DELETE_COMPLETE", "DELETE_SKIPPED"], ["DELETE_FAILED"], deferred
-						, (err) =>
-							deferred.reject err
+
+		try
+			cf = new @AWS.CloudFormation({ region: @region })
+			cf.deleteStack { StackName: stackName }, (err, data) =>
+				if err?
+					deferred.reject err
+				else
+					@getStackId(stackName)
+						.done (id) =>
+								@pollStackStatus id, ["DELETE_COMPLETE", "DELETE_SKIPPED"], ["DELETE_FAILED"], deferred
+							, (err) =>
+								deferred.reject err
+		catch e
+			deferred.reject e
 
 		deferred.promise
 
@@ -187,12 +213,15 @@ cloudFormationProvider = class extends resourceProvider
 		if !templateBody?
 			return @Q.reject 'You must define templateBody'
 
-		updateStackOptions = 
-			StackName: stackName,
-			TemplateBody: templateBody
+		deferred = @Q.defer()
 
-		if parameters?
-			updateStackOptions.Parameters = parameters
+		try
+			updateStackOptions = 
+				StackName: stackName,
+				TemplateBody: templateBody
+
+			if parameters?
+				updateStackOptions.Parameters = parameters
 
 		deferred = @Q.defer()
 		cf = new @AWS.CloudFormation({ region: @region })

@@ -11,13 +11,16 @@ ec2SnapshotsProvider = class extends resourceProvider
 		super region
 
 	getResources: () ->
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.describeSnapshots, ec2)(
-			OwnerIds: ["self"]
-		)
-			.then (data) =>
-				_.map data.Snapshots, (snapshot) ->
-					resource.generateResource snapshot, snapshot.SnapshotId, @region, tag.createTags(snapshot.Tags), this
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.describeSnapshots, ec2)(
+				OwnerIds: ["self"]
+			)
+				.then (data) =>
+					_.map data.Snapshots, (snapshot) ->
+						resource.generateResource snapshot, snapshot.SnapshotId, @region, tag.createTags(snapshot.Tags), this
+		catch e
+			Q.reject e
 
 ec2SnapshotsProvider.factory = (region) ->
 	new ec2SnapshotsProvider region, aws, Q

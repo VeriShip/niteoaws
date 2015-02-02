@@ -11,11 +11,14 @@ ec2VolumesProvider = class extends resourceProvider
 		super region
 
 	getResources: () ->
-		ec2 = new @AWS.EC2({region: @region})
-		Q.nbind(ec2.describeVolumes, ec2)({ })
-			.then (data) =>
-				_.map data.Volumes, (volume) ->
-					resource.generateResource volume, volume.VolumeId , @region, tag.createTags(volume.Tags), this
+		try
+			ec2 = new @AWS.EC2({region: @region})
+			Q.nbind(ec2.describeVolumes, ec2)({ })
+				.then (data) =>
+					_.map data.Volumes, (volume) ->
+						resource.generateResource volume, volume.VolumeId , @region, tag.createTags(volume.Tags), this
+		catch e
+			Q.reject e
 
 ec2VolumesProvider.factory = (region) ->
 	new ec2VolumesProvider region, aws, Q
