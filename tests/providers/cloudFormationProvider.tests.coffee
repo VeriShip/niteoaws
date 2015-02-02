@@ -170,7 +170,7 @@ describe 'niteoaws', ->
 						describeStacks: (options, callback) ->
 							callback null, 
 								Stacks: [
-									StackName: options.StackName
+									StackName: "TestStackName" 
 								]
 
 				niteoCF = getTarget()
@@ -192,7 +192,7 @@ describe 'niteoaws', ->
 							callback null, 
 								Stacks: [
 									{ StackName: "Some Random Stack" },
-									{ StackName: options.StackName },
+									{ StackName: "TestStackName" },
 									{ StackName: "Some Other Random Stack" },
 								]
 

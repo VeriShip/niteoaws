@@ -58,7 +58,7 @@ cloudFormationProvider = class extends resourceProvider
 
 		deferred = @Q.defer()
 		cf = new @AWS.CloudFormation({ region: @region })
-		cf.describeStacks { StackName: stackName }, (err, data) ->
+		cf.describeStacks { }, (err, data) ->
 
 			if err?
 				deferred.reject err
