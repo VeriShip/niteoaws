@@ -145,12 +145,12 @@ cloudFormationProvider = class extends resourceProvider
 					else
 						deferred.notify targetStack.StackStatus
 						@t.setTimeout( =>
-								@pollStackStatus stackId, successStatuses, failureStatuses, deferred 
+								@pollStackStatus stackId, successStatuses, failureStatuses, deferred
 							5000)
 		catch e
 			deferred.reject e
 
-	createStack: (stackName, templateBody, parameters) ->
+	createStack: (stackName, templateBody, parameters, capabilities) ->
 
 		if !stackName?
 			return @Q.reject 'You must define stackName'
@@ -161,12 +161,15 @@ cloudFormationProvider = class extends resourceProvider
 		deferred = @Q.defer()
 
 		try
-			createStackOptions = 
+			createStackOptions =
 				StackName: stackName,
 				TemplateBody: templateBody
 
 			if parameters?
 				createStackOptions.Parameters = parameters
+
+			if capabilities?
+				createStackOptions.Capabilities = capabilities
 
 			cf = new @AWS.CloudFormation({ region: @region })
 			cf.createStack createStackOptions, (err, data) =>
