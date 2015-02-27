@@ -227,7 +227,7 @@ cloudFormationProvider = class extends resourceProvider
 				updateStackOptions.Parameters = parameters
 
 			if capabilities?
-				createStackOptions.Capabilities = capabilities
+				updateStackOptions.Capabilities = capabilities
 
 			cf = new @AWS.CloudFormation({ region: @region })
 			cf.updateStack updateStackOptions, (err, data) =>
