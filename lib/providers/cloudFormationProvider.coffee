@@ -208,7 +208,7 @@ cloudFormationProvider = class extends resourceProvider
 
 		deferred.promise
 
-	updateStack: (stackName, templateBody, parameters) ->
+	updateStack: (stackName, templateBody, parameters, capabilities) ->
 
 		if !stackName?
 			return @Q.reject 'You must define stackName'
@@ -225,6 +225,9 @@ cloudFormationProvider = class extends resourceProvider
 
 			if parameters?
 				updateStackOptions.Parameters = parameters
+
+			if capabilities?
+				createStackOptions.Capabilities = capabilities
 
 			cf = new @AWS.CloudFormation({ region: @region })
 			cf.updateStack updateStackOptions, (err, data) =>
