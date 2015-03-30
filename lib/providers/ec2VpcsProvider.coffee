@@ -15,7 +15,7 @@ ec2VpcsProvider = class extends resourceProvider
 			ec2 = new @AWS.EC2({region: @region})
 			Q.nbind(ec2.describeVpcs, ec2)({ })
 				.then (data) =>
-					_.map data.Vpcs, (vpc) ->
+					_.map data.Vpcs, (vpc) =>
 						resource.generateResource vpc, vpc.VpcId, @region, tag.createTags(vpc.Tags), this
 		catch e
 			Q.reject e

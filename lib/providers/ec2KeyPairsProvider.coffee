@@ -15,7 +15,7 @@ ec2KeyPairsProvider = class extends resourceProvider
 			ec2 = new @AWS.EC2({region: @region})
 			Q.nbind(ec2.describeKeyPairs, ec2)({ })
 				.then (data) =>
-					_.map data.KeyPairs, (keyPair) ->
+					_.map data.KeyPairs, (keyPair) =>
 						resource.generateResource keyPair, keyPair.KeyName, @region, [ ], this
 		catch e
 			Q.reject e
