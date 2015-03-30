@@ -15,7 +15,7 @@ ec2VolumesProvider = class extends resourceProvider
 			ec2 = new @AWS.EC2({region: @region})
 			Q.nbind(ec2.describeVolumes, ec2)({ })
 				.then (data) =>
-					_.map data.Volumes, (volume) ->
+					_.map data.Volumes, (volume) =>
 						resource.generateResource volume, volume.VolumeId , @region, tag.createTags(volume.Tags), this
 		catch e
 			Q.reject e

@@ -17,7 +17,7 @@ ec2SnapshotsProvider = class extends resourceProvider
 				OwnerIds: ["self"]
 			)
 				.then (data) =>
-					_.map data.Snapshots, (snapshot) ->
+					_.map data.Snapshots, (snapshot) =>
 						resource.generateResource snapshot, snapshot.SnapshotId, @region, tag.createTags(snapshot.Tags), this
 		catch e
 			Q.reject e
