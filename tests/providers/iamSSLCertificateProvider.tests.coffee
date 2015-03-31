@@ -4,7 +4,7 @@ path = require 'path'
 _ = require 'lodash'
 niteoaws = require(path.join __dirname, '../../lib/niteoaws.js')
 
-AWS = null
+AWS = Q = fs = t = null
 region = "Test Region"
 	
 getTarget = ->
@@ -21,58 +21,42 @@ describe 'niteoaws', ->
 
 		describe 'getResources', ->
 
-			generateTestCertificates = (num) ->
+			generateTestCertificates = (pages, num) ->
 				i = 0
-				result = { ServerCertificateMetadataList: [] }
+				result = []
 
-				while i < num 
-					result.ServerCertificateMetadataList.push { ServerCertificateId: i, Tags: [] }
+				while i < pages
+					result.push { ServerCertificateMetadataList: [] , Marker: "Token: #{i}" }
+					j = 0
+					while j < num 
+						j++
+						result[i].ServerCertificateMetadataList.push { ServerCertificateId: "#{i}-#{j}", Tags: [] }
+
 					i++
+
+				result[0].Marker = null
 				result
 
-			getResourcesTests = (num, done) ->
 
-				resources = generateTestCertificates num
+			it 'should return 50 resources when there are 5 pages with 10 items per page.', (done) ->
 
-				AWS = 
+				numTimesProgressCalled = 0
+
+				resources = generateTestCertificates 5, 10
+
+				AWS =
 					IAM: class
 						listServerCertificates: (options, callback) ->
-							callback null, resources
+							callback null, resources.pop()
 
-				niteoCertificates = getTarget()
+				certProvider = getTarget()
 
-				niteoCertificates.getResources()
+				certProvider.getResources()
 					.done (data) ->
-							data.length.should.be.equal(num)
-							i = 0
-							while i < num
-								resources.ServerCertificateMetadataList[i].ServerCertificateId.should.equal(data[i].id)
-								i++
-							done()
-						, (err) ->
-							assert.fail 'An error should not have been thrown.'
-							done()
-
-			it 'should return 1 resources when there are 1 items.', (done) ->
-
-				getResourcesTests 1, done
-
-			it 'should return 10 resources when there are 10 items.', (done) ->
-
-				getResourcesTests 10, done
-
-			it 'should return 100 resources when there are 100 items.', (done) ->
-
-				getResourcesTests 100, done
-			
-			it 'should still return a promise if an exception is encountered.', (done) ->
-
-				AWS = 
-					IAM: class
-						constructor: ->
-							throw 'Some Random Error'
-
-				getTarget().getResources()
-					.catch (err) ->
-						err.should.equal 'Some Random Error'
+						data.length.should.be.equal(50)
 						done()
+					, (err) ->
+				assert.fail 'An error should not have been thrown.'
+				done()
+			
+			

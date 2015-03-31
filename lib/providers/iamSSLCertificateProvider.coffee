@@ -10,15 +10,37 @@ iamSSLCertificateProvider = class extends resourceProvider
 	constructor: (region, @AWS) ->
 		super region
 
-	getResources: () ->
+	getResources: (marker, resources, deferred) ->
+
+		if !resources? 
+				resources = []
+
+		if !deffered?
+				deffered = Q.defer()
+
 		try
+			listServerCertificatesOptions = {}
+			if marker?
+					listServerCertificates.Marker = marker
+
 			iam = new @AWS.IAM({region: @region})
-			Q.nbind(iam.listServerCertificates, iam)({ })
-				.then (data) =>
-					_.map data.ServerCertificateMetadataList, (cert) ->
-						resource.generateResource cert, cert.ServerCertificateId, @region, [ ], this
+			iam.listServerCertificates listServerCertificatesOptions, (err, data) =>
+				if err?
+					deferred.reject err
+				else
+					for certificate in data.ServerCertificateMetadataList
+							resources.push(resource.generateResource certificate, certificate.ServerCertificateId, @region, [ ], this)
+					
+					if data.IsTruncated
+						deferred.notify data.Marker
+						@getResources data.Marker, resources, deferred
+					else
+						deferred.resolve resources
 		catch e
-			Q.reject e
+			 deferred.reject e
+
+		return defered.promise
+
 
 iamSSLCertificateProvider.factory = (region) ->
 	new iamSSLCertificateProvider region, aws, Q
