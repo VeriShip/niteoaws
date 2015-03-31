@@ -10,39 +10,38 @@ iamSSLCertificateProvider = class extends resourceProvider
 	constructor: (region, @AWS) ->
 		super region
 
-	getResources: (marker, resources, deferred) ->
 
-		if !resources? 
-				resources = []
+	getResources: (marker, isTruncated, resources, deferred) ->
+		if !resources?
+			resources = []
 
-		if !deffered?
-				deffered = Q.defer()
+		if !deferred?
+			deferred = Q.defer()
 
 		try
 			listServerCertificatesOptions = {}
 			if marker?
-					listServerCertificates.Marker = marker
+				listServerCertificatesOptions.Marker = marker
+			if isTruncated?
+				listServerCertificatesOptions.IsTruncated = isTruncated
 
 			iam = new @AWS.IAM({region: @region})
 			iam.listServerCertificates listServerCertificatesOptions, (err, data) =>
 				if err?
 					deferred.reject err
 				else
-					for certificate in data.ServerCertificateMetadataList
-							resources.push(resource.generateResource certificate, certificate.ServerCertificateId, @region, [ ], this)
-					
+					for cert in data.ServerCertificateMetadataList
+						resources.push(resource.generateResource cert, cert.ServerCertificateId, @region, [], this)
 					if data.IsTruncated
 						deferred.notify data.Marker
-						@getResources data.Marker, resources, deferred
-					else
-						deferred.resolve resources
+						@getResources data.Marker, data.IsTruncated, resources, deferred
+					else deferred.resolve resources
 		catch e
-			 deferred.reject e
+			deferred.reject e
 
-		return defered.promise
-
-
+		return deferred.promise
+		
 iamSSLCertificateProvider.factory = (region) ->
-	new iamSSLCertificateProvider region, aws, Q
+	new iamSSLCertificateProvider region, aws
 
 module.exports = iamSSLCertificateProvider

@@ -6,7 +6,7 @@ fs = require 'fs'
 niteoaws = require(path.join __dirname, '../lib/niteoaws.js')
 
 #	Notice this test is skipped.  This is a simple test I created to try out exporting our infrastructure to JSON.
-describe 'test', ->
+describe.skip 'test', ->
 	this.timeout 10000
 
 	target = new niteoaws.iamSSLCertificateProvider('us-east-1', require 'aws-sdk')
