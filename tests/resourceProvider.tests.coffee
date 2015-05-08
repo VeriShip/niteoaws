@@ -110,13 +110,16 @@ describe 'niteoaws', ->
 					.done (data) ->
 							data.length.should.be.greaterThan 0
 							itemCheck = _.all data, (resource)->
-								_.any resource.tags, (tag)->
+								first = _.any resource.tags, (tag)->
 									query[0].equals tag
+								second = _.any resource.tags, (tag) ->
+									query[1].equals tag
+								return first and second
 
 							itemCheck.should.be.true
 							done()
 
-			it 'should return resource with matching tags. (Multiple key and value tag)', (done) ->
+			it 'should return resource with matching tags. (Multiple key and value tag 0)', (done) ->
 
 				query = [
 					new niteoaws.tag "key 1", "value 1"
@@ -127,25 +130,51 @@ describe 'niteoaws', ->
 					.done (data) ->
 							data.length.should.be.greaterThan 0
 							itemCheck = _.all data, (resource)->
-								_.any resource.tags, (tag)->
+								first = _.any resource.tags, (tag)->
 									query[0].equals tag
+								second = _.any resource.tags, (tag) ->
+									query[1].equals tag
+								return first and second
 
 							itemCheck.should.be.true
 							done()
 
-			it 'should return resource with matching tags. (Multiple key and value tag)', (done) ->
+			it 'should return resource with matching tags. (Multiple key and value tag 1)', (done) ->
 
 				query = [
 					new niteoaws.tag "key 1", "value 1"
-					new niteoaws.tag "key 2"
+					new niteoaws.tag "key 2", "value 2"
 				]
 
 				target.findResources(query)
 					.done (data) ->
 							data.length.should.be.greaterThan 0
 							itemCheck = _.all data, (resource)->
-								_.any resource.tags, (tag)->
+								first = _.any resource.tags, (tag)->
 									query[0].equals tag
+								second = _.any resource.tags, (tag) ->
+									query[1].equals tag
+								return first and second
+
+							itemCheck.should.be.true
+							done()
+
+			it 'should return resource with matching tags. (Multiple key and value tag 2)', (done) ->
+
+				query = [
+					new niteoaws.tag "key 1"
+					new niteoaws.tag "key 2", "value 2"
+				]
+
+				target.findResources(query)
+					.done (data) ->
+							data.length.should.be.greaterThan 0
+							itemCheck = _.all data, (resource)->
+								first = _.any resource.tags, (tag)->
+									query[0].equals tag
+								second = _.any resource.tags, (tag) ->
+									query[1].equals tag
+								return first and second
 
 							itemCheck.should.be.true
 							done()
@@ -170,6 +199,30 @@ describe 'niteoaws', ->
 			it 'should not return resources with matching tags.', (done) ->
 
 				query = [
+					new niteoaws.tag null, "value 6"
+				]
+
+				target.findResources(query)
+					.done (data) ->
+							data.length.should.equal 0
+							done()
+
+			it 'should not return resources with matching tags. (One tag matches but the other does not.)', (done) ->
+
+				query = [
+					new niteoaws.tag null, "value 6"
+					new niteoaws.tag "key 2", "value 2"
+				]
+
+				target.findResources(query)
+					.done (data) ->
+							data.length.should.equal 0
+							done()
+
+			it 'should not return resources with matching tags. (One tag matches but the other does not. [Order Switched])', (done) ->
+
+				query = [
+					new niteoaws.tag "key 1", "value 1"
 					new niteoaws.tag null, "value 6"
 				]
 

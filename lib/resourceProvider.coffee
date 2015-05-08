@@ -25,8 +25,10 @@ resourceProvider = class
 					if !queryTags? or queryTags.length == 0
 						return true;
 					else
-						_.any resource.tags, (tag) ->
-							_.any queryTags, (queryTag) ->
+						result = true
+						queryTags.forEach (queryTag) ->
+							result = result and _.any resource.tags, (tag) ->
 								queryTag.equals tag
+						return result
 
 module.exports = resourceProvider
