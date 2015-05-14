@@ -9,13 +9,13 @@ niteoaws = require(path.join __dirname, '../lib/niteoaws.js')
 describe.skip 'test', ->
 	this.timeout 10000
 
-	target = new niteoaws.iamSSLCertificateProvider('us-east-1', require 'aws-sdk')
+	target = new niteoaws.ec2SubnetsProvider('us-west-2', require 'aws-sdk')
 
 	it 'test', (done) ->
 
 		target.getResources()
 			.done (data) ->
-					console.log JSON.stringify(data, null, 4)
+					console.dir data
 					done()
 				, (err) ->
 					console.log err
