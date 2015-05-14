@@ -14,6 +14,7 @@ ec2SecurityGroupsProvider = require(path.join(__dirname, 'providers/ec2SecurityG
 ec2SnapshotsProvider = require(path.join(__dirname, 'providers/ec2SnapshotsProvider.js')) 
 ec2VolumesProvider = require(path.join(__dirname, 'providers/ec2VolumesProvider.js')) 
 ec2VpcsProvider = require(path.join(__dirname, 'providers/ec2VpcsProvider.js')) 
+ec2SubnetsProvider = require(path.join(__dirname, 'providers/ec2SubnetsProvider.js')) 
 iamSSLCertificateProvider = require(path.join(__dirname, 'providers/iamSSLCertificateProvider.js')) 
 
 niteoaws = class extends resourceProvider
@@ -45,6 +46,7 @@ niteoaws.resourceProviders = [
 	ec2SnapshotsProvider,
 	ec2VolumesProvider,
 	ec2VpcsProvider,
+	ec2SubnetsProvider,
 	iamSSLCertificateProvider
 ]
 niteoaws.cloudFormationProvider = cloudFormationProvider
@@ -57,6 +59,7 @@ niteoaws.ec2SecurityGroupsProvider = ec2SecurityGroupsProvider
 niteoaws.ec2SnapshotsProvider = ec2SnapshotsProvider
 niteoaws.ec2VolumesProvider = ec2VolumesProvider
 niteoaws.ec2VpcsProvider = ec2VpcsProvider
+niteoaws.ec2SubnetsProvider = ec2SubnetsProvider
 niteoaws.iamSSLCertificateProvider = iamSSLCertificateProvider
 
 
