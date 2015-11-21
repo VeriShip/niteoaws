@@ -1,11 +1,14 @@
 language: node_js
 node_js:
 - '0.10'
+- '0.11'
+- '0.12'
+- '4.0'
+- '4.1'
 before_script:
-- npm install -g grunt-cli
 - npm install
 script:
-- grunt
+- npm run build
 deploy:
   provider: npm
   email: npm@niteoholdings.com
@@ -15,5 +18,6 @@ deploy:
   on:
     tags: true
     all_branches: true
-    repo: NiteoSoftware/niteoaws
+    repo: VeriShip/niteoaws
+    node: '4.1'
 
