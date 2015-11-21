@@ -1,6 +1,6 @@
 {
   "name": "niteoaws",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "A library that can be used to help make youre AWS infrastructure more friendly.",
   "main": "bin/lib/niteoaws.js",
   "scripts": {
