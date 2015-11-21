@@ -10,14 +10,13 @@ before_script:
 script:
 - npm run build
 deploy:
+  skip_cleanup: true
   provider: npm
   email: npm@niteoholdings.com
-  skip_cleanup: true
   api_key:
-    secure: "R4N8aZ67d6sIVmz2Qbvn7JgrQEvyegfxb8FgtRsxr6xi9vcXVkSfUrFbEPyYX/kY5gQuaEOVjiF5VHbG/OImhHprAn1ya6z9qxVJBr0hoEIQJlucMKqP+mFw1eKjlMMUmgRMR3FHDc9SiV/+iEuY9Tgub+2V0RsRU4ab+YHEyZU="
+    secure: I8dZ9c1PYObTU49cEB8rJjK0f/wPrNVF/rNDXLieugbxMaReOomEh4IwhZugaNGLQf8RhfCLPh1VE19MK/baHCAaM4RIWyq9WLfGgkPjrvg4mKZeWyAPV0avTBwNy7+CJcCHQpYLVAowdnZa/Sg6Q0RnXLC4Qtf1W6QeO5m1ZWY=
   on:
     tags: true
     all_branches: true
     repo: VeriShip/niteoaws
     node: '4.1'
-
