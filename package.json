@@ -32,5 +32,11 @@
     "lodash": "^2.4.1",
     "moment": "^2.8.4",
     "q": "^1.1.2"
-  }
+  },
+  "keywords": [
+	"aws",
+  	"amazon",
+	"promise",
+	"tags"
+  ]
 }
